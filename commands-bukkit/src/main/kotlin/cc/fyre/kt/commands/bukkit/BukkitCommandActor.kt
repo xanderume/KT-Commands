@@ -96,10 +96,7 @@ open class BukkitCommandActor(val sender: CommandSender) : CommandActor<CommandS
 
                 Audience.sender(this.sender).sendMessage(component.build())
             }
-            CommandProcessException.ErrorType.PARAMETER_CONVERSION,CommandProcessException.ErrorType.ANNOTATION_CONVERSION -> {
-                this.audience.sendMessage(CommandExecutionFailedMessage)
-                exception.printStackTrace()
-            }
+            CommandProcessException.ErrorType.PARAMETER_CONVERSION,CommandProcessException.ErrorType.ANNOTATION_CONVERSION -> {}
         }
 
     }

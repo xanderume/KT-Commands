@@ -17,14 +17,8 @@ class DefaultCommandProcessor(
 
     //TODO somewhere else?
     init {
-        this.function.parameters.forEach{parameter -> parameter.annotations.forEach{annotation ->
-
-            val converter = this.commandMap[annotation.annotationClass,parameter.type]
-
-            if (converter != null) {
-                converter.onTypeRegister(annotation)
-            }
-
+        this.function.parameters.forEach{parameter -> parameter.annotations.forEach { annotation ->
+            this.commandMap[annotation.annotationClass, parameter.type]?.onTypeRegister(annotation)
         }}
     }
 
@@ -92,7 +86,7 @@ class DefaultCommandProcessor(
                             parameters[argument.parameter] = converted
                         } else {
 
-                            if (!(argument.nullable || argument.optional)) {
+                            if (!(argument.nullable /*|| argument.optional*/)) {
                                 adapter.handleException(actor,source,null)
                                 throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.PARAMETER_CONVERSION)
                             }
@@ -128,8 +122,8 @@ class DefaultCommandProcessor(
                             paramIndex++
                         } else {
 
-                            if (!(argument.nullable || argument.optional)) {
-                                adapter.handleException(actor,source,null)
+                            if (!(argument.nullable /*|| argument.optional*/)) {
+                                adapter.handleException(actor.value,source,null)
                                 throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.PARAMETER_CONVERSION)
                             }
 
