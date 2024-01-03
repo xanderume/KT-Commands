@@ -62,7 +62,7 @@ object Test2Command
 ### Adding Parameters
 ```kotlin
 @CommandExecutor
-fun execute(sender: CommandSender,player: Player,number: Int) {
+fun execute(sender: CommandSender,player: Player,number: Number) {
     sender.sendMessage("Sent $number to ${player.name}")
     player.sendMessage(number.toString())
 }
@@ -205,4 +205,4 @@ object PlayerVisibilityConverter : BukkitAnnotationConverter<VisibleToPlayer,Pla
 ```
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE.txt).
