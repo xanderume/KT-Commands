@@ -13,28 +13,32 @@ annotation class VisibleToPlayer(
 
 object PlayerVisibilityConverter : BukkitAnnotationConverter<VisibleToPlayer,Player> {
 
-    override val valueType: KClass<*> = Player::class
-    override val annotationType: KClass<*> = VisibleToPlayer::class
-
-    override fun preTransform(actor: CommandSender,source: String,annotation: VisibleToPlayer): Boolean {
+    override suspend fun preTransform(actor: CommandSender,source: String,annotation: VisibleToPlayer): Boolean {
         return true
     }
 
-    override fun postTransform(actor: CommandSender,source: Player,annotation: VisibleToPlayer): Boolean {
+    override suspend fun postTransform(actor: CommandSender,source: String,value: Player,annotation: VisibleToPlayer): Player? {
 
         if (actor !is Player) {
-            return true
+            return value
         }
 
         if (actor.canSee(actor)) {
-            return true
+            return value
         }
 
-        if (annotation.bypassPermission.isEmpty()) {
-            return false
+        if (annotation.bypassPermission.isEmpty() && !actor.isOp) {
+            return null
         }
 
-        return actor.hasPermission(annotation.bypassPermission)
+        if (!actor.hasPermission(annotation.bypassPermission)) {
+            return null
+        }
+
+        return value
     }
+
+    override val valueType: KClass<*> = Player::class
+    override val annotationType: KClass<*> = VisibleToPlayer::class
 
 }

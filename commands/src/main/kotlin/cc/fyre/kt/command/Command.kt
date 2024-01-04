@@ -86,7 +86,6 @@ interface Command {
         } else {
             function.callBy(parameters)
         }
-
     }
 
 }

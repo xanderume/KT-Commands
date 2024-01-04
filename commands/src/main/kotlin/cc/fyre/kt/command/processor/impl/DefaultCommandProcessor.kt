@@ -176,25 +176,33 @@ class DefaultCommandProcessor(
 
         }
 
-        val converted = try {
+        var converted: Any? = try {
             parameterConverter.convert(actor,source,parameter.annotations)
         } catch (ex: Exception) {
             parameterConverter.handleException(actor,source,ex)
             throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.PARAMETER_CONVERSION)
         }
 
-        if (converted != null && annotations.isNotEmpty()) {
+        if (annotations.isNotEmpty()) {
 
             for ((annotation,annotationConverter) in annotations) {
 
                 if (annotationConverter == null) {
-                    throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.ANNOTATION_INVALID,annotation.annotationClass.simpleName!!)
+                    throw CommandProcessException(this.function.command, CommandProcessException.ErrorType.ANNOTATION_INVALID, annotation.annotationClass.simpleName!!)
                 }
 
-                if (!annotationConverter.postTransform(actor,converted,annotation)) {
-                    throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.ANNOTATION_CONVERSION)
+                if (annotationConverter.nullable != (converted == null)) {
+                    continue
                 }
 
+                converted = annotationConverter.postTransform(actor,source,converted,annotation) ?: throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.ANNOTATION_CONVERSION)
+//                val continuation = annotationConverter.postTransform(actor,source,converted,annotation)
+//
+//                if (!continuation.resume) {
+//                    throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.ANNOTATION_CONVERSION)
+//                }
+//
+//                converted = continuation.value
             }
 
         }

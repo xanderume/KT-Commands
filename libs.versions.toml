@@ -1,8 +1,12 @@
 [versions]
 mini-message-version = "4.14.0"
+junit-version = "5.8.1"
 minecraft-coroutines-version = "2.12.1"
 
 [libraries]
+
+junit-jupiter-api = {module = "org.junit.jupiter:junit-jupiter-api",version.ref = "junit-version"}
+junit-jupiter-engine = {module = "org.junit.jupiter:junit-jupiter-engine",version.ref = "junit-version"}
 
 kotlin-atomic = {module = "org.jetbrains.kotlinx:atomicfu",version = "0.21.0"}
 kotlin-coroutines = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-core",version = "1.7.3"}
