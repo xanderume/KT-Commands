@@ -4,6 +4,7 @@ import cc.fyre.kt.command.*
 import cc.fyre.kt.command.argument.parameter.ParameterConverter
 import cc.fyre.kt.command.argument.parameter.annotation.AnnotationConverter
 import cc.fyre.kt.command.exception.CommandLoadException
+import cc.fyre.kt.commands.bukkit.event.CommandRegisterEvent
 import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import org.bukkit.Bukkit
 import org.bukkit.command.SimpleCommandMap
@@ -59,7 +60,7 @@ object BukkitCommandMap : CommandMap<BukkitCommand> {
         val result = BukkitCommand(this.commands.size,loader)
 
         if (loader.function == null && loader.helper == null) {
-            throw CommandLoadException(command,"Command must either have a ${CommandExecutor::class.simpleName} function or sub commands!")
+            throw CommandLoadException(command,"Command must either have a ${CommandExecutor::class.simpleName} function or a helper!")
         }
 
         if (parent != null) {
@@ -71,6 +72,12 @@ object BukkitCommandMap : CommandMap<BukkitCommand> {
                 ?: throw CommandLoadException(command,"Parent ${loader.parent!!.parent.simpleName} has not been registered!")
 
             return register(command,source)
+        }
+
+        val event = CommandRegisterEvent(loader,result).also{Bukkit.getServer().pluginManager.callEvent(it)}
+
+        if (event.isCancelled) {
+            return result
         }
 
         this.commands.add(result)
