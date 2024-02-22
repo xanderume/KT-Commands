@@ -2,3 +2,4 @@
 /commands-bukkit/build/
 /commands/build/
 /.gradle/
+/commands-velocity/build/
