@@ -7,4 +7,12 @@ import cc.fyre.kt.command.CommandAnnotation
 @CommandAnnotation
 annotation class Flag(
     val flags: Array<String>
-)
+) {
+
+    companion object {
+
+        const val FLAG_CHAR = '-'
+
+    }
+
+}

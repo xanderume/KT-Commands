@@ -38,7 +38,7 @@ open class CommandFunction(val command: Command,val function: KFunction<*>) {
                     }
 
                     for (key in value.flags) {
-                        this.flagsByKey[key.lowercase()] = value
+                        this.flagsByKey["-${key.lowercase()}"] = value
                     }
 
                     this.flags.add(value)

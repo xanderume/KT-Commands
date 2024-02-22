@@ -1,23 +1,17 @@
-package cc.fyre.kt.commands.bukkit
+package cc.fyre.kt.commands.velocity
 
 import cc.fyre.kt.command.*
 import cc.fyre.kt.command.argument.parameter.ParameterConverter
 import cc.fyre.kt.command.argument.parameter.annotation.AnnotationConverter
 import cc.fyre.kt.command.exception.CommandLoadException
-import cc.fyre.kt.commands.bukkit.event.CommandRegisterEvent
-import net.kyori.adventure.platform.bukkit.BukkitAudiences
-import org.bukkit.Bukkit
-import org.bukkit.command.SimpleCommandMap
-import org.bukkit.plugin.java.JavaPlugin
+import com.github.shynixn.mccoroutine.velocity.registerSuspend
 import kotlin.reflect.KClass
 
-object BukkitCommandMap : CommandMap<BukkitCommand> {
+object BungeeCommandMap : CommandMap<BungeeCommand> {
 
-    private val map: SimpleCommandMap = CommandMapProperty.getter.call(Bukkit.getServer())
-
-    private val commands = arrayListOf<BukkitCommand>()
-    private val commandsBySource = hashMapOf<KClass<*>,BukkitCommand>()
-    private val knownCommands: MutableMap<String,org.bukkit.command.Command> = CommandMapKnownCommandsProperty.getter.call(this.map)
+    private val commands = arrayListOf<BungeeCommand>()
+    private val commandsByName = hashMapOf<String,BungeeCommand>()
+    private val commandsBySource = hashMapOf<KClass<*>, BungeeCommand>()
 
     private val parameterConverters = hashSetOf<ParameterConverter<*,*>>()
     private val parameterConvertersBySource = hashMapOf<KClass<*>,ParameterConverter<*,*>>()
@@ -25,22 +19,13 @@ object BukkitCommandMap : CommandMap<BukkitCommand> {
     private val annotationConverters = hashSetOf<AnnotationConverter<*, *, *>>()
     private val annotationConvertersBySource = hashMapOf<KClass<*>,HashMap<KClass<*>,AnnotationConverter<*,*,*>>>()
 
-    override val defaultTabCompleter: CommandTabCompleter<*> = BukkitCommandTabCompleter
+    override val defaultTabCompleter: CommandTabCompleter<*> = BungeeCommandTabCompleter
 
-    fun getKnownCommands():Map<String,org.bukkit.command.Command> {
-        return this.knownCommands
+    override fun get(command: String): BungeeCommand? {
+        return this.commandsByName[command.lowercase()]
     }
 
-    override fun get(command: String): BukkitCommand? {
-        return (this.knownCommands[command.lowercase()] as? BukkitCommandWrapper)?.command
-    }
-
-    override fun get(source: Any): BukkitCommand? {
-
-        if (source is KClass<*>) {
-            return this.commandsBySource[source]
-        }
-
+    override fun get(source: Any): BungeeCommand? {
         return this.commandsBySource[source::class]
     }
 
@@ -62,7 +47,7 @@ object BukkitCommandMap : CommandMap<BukkitCommand> {
     override fun register(command: Any, parent: Command?): Command {
 
         val loader = loadCommand(command)
-        val result = BukkitCommand(this.commands.size,loader)
+        val result = BungeeCommand(this.commands.size,loader)
 
         if (loader.function == null && loader.helper == null) {
             throw CommandLoadException(command,"Command must either have a ${CommandExecutor::class.simpleName} function or a helper!")
@@ -70,7 +55,7 @@ object BukkitCommandMap : CommandMap<BukkitCommand> {
 
         if (parent != null) {
             parent.children.add(result)
-            result.setLabel("${parent.label} ${result.name}")
+            result.label = ("${parent.label} ${result.name}")
         } else if (loader.parent != null) {
 
             val source = this.commandsBySource[loader.parent!!.parent]
@@ -79,28 +64,24 @@ object BukkitCommandMap : CommandMap<BukkitCommand> {
             return register(command,source)
         }
 
-        val event = CommandRegisterEvent(loader,result).also{Bukkit.getServer().pluginManager.callEvent(it)}
-
-        if (event.isCancelled) {
-            return result
-        }
-
         this.commands.add(result)
         this.commandsBySource[loader.clazz] = result
 
         if (result.children.isNotEmpty()) {
 
             if (result.function == null && result.description?.isEmpty() == true) {
-                result.setDescription("View all available ${result.name} commands")
+                result.description = "View all available ${result.name} commands"
             }
 
         }
 
-        if (parent == null) {
-            this.map.register(result.plugin.name,result.wrapper)
-            Bukkit.getServer().helpMap.addTopic(BukkitCommandTopic(result))
-        }
+        val commandManager = ProxyServer.commandManager
 
+        if (parent == null) {
+            commandManager.registerSuspend(commandManager.metaBuilder(result.name)
+                .aliases(*result.aliases)
+                .aliases().build(),result.wrapper,BungeeCommandPlugin.instance) // TODO: plugin instance
+        }
 
         return result
     }
@@ -128,8 +109,8 @@ object BukkitCommandMap : CommandMap<BukkitCommand> {
         this.annotationConverters.add(converter)
     }
 
-    override fun iterator(): Iterator<BukkitCommand> {
+    override fun iterator(): Iterator<BungeeCommand> {
         return this.commands.iterator()
     }
-
+    
 }

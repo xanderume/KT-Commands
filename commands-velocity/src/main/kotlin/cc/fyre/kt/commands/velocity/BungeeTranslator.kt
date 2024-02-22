@@ -1,4 +1,4 @@
-package cc.fyre.kt.commands.bukkit
+package cc.fyre.kt.commands.velocity
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent

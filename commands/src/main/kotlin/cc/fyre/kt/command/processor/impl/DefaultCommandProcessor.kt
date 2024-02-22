@@ -3,6 +3,7 @@ package cc.fyre.kt.command.processor.impl
 import cc.fyre.kt.command.CommandActor
 import cc.fyre.kt.command.CommandFunction
 import cc.fyre.kt.command.CommandMap
+import cc.fyre.kt.command.argument.flag.Flag
 import cc.fyre.kt.command.argument.parameter.Parameter
 import cc.fyre.kt.command.argument.parameter.ParameterConverter
 import cc.fyre.kt.command.exception.CommandProcessException
@@ -24,11 +25,13 @@ class DefaultCommandProcessor(
 
     override suspend fun process(actor: CommandActor<*,*>,label: String,arguments: Array<out String>): suspend () -> MutableMap<KParameter,Any?> {
         return parameters@ {
-            val parameters = mutableMapOf<KParameter,Any?>()
+
+            val parameters = hashMapOf<KParameter,Any?>()
 
             var argIndex = 0
             var paramIndex = 0
             var attempts = 0
+            var flagsCount = 0
             var parameterCount = 0 // this is so we know all required parameters are provided
 
             while ((parameterCount < this.function.min || attempts != this.function.max) && argIndex < arguments.size) {
@@ -36,10 +39,15 @@ class DefaultCommandProcessor(
                 var source = arguments[argIndex]
 
                 // Check if the current argument is an option
-                var option = this.function.flagsByKey[source.lowercase()]
+                var option = if (source[0] == cc.fyre.kt.command.annotation.Flag.FLAG_CHAR) {
+                    this.function.flagsByKey[source.lowercase()]
+                } else {
+                    null
+                }
 
                 if (option != null && option.hasPermission(actor)) {
                     // Handle options (e.g., flags)
+                    flagsCount++
                     parameters[option.parameter] = true
                     argIndex++
                 } else {
@@ -64,9 +72,14 @@ class DefaultCommandProcessor(
 
                             val part = arguments[i]
 
-                            option = this.function.flagsByKey[part.lowercase()]
+                            option = if (source[0] == cc.fyre.kt.command.annotation.Flag.FLAG_CHAR) {
+                                this.function.flagsByKey[part.lowercase()]
+                            } else {
+                                null
+                            }
 
                             if (option != null && option.hasPermission(actor)) {
+                                flagsCount++
                                 parameters[option.parameter] = true
                                 continue
                             }
@@ -138,8 +151,27 @@ class DefaultCommandProcessor(
                 attempts++
             }
 
+            if (this.function.flags.isNotEmpty() && flagsCount < this.function.flags.size && argIndex < arguments.size) {
 
-            if (parameters.size < this.function.min) {
+                for (i in (argIndex + 1) until arguments.size) {
+
+                    val source = arguments[i]
+                    val option = if (source[0] == cc.fyre.kt.command.annotation.Flag.FLAG_CHAR) {
+                        this.function.flagsByKey[source.lowercase()]
+                    } else {
+                        null
+                    }
+
+                    if (option != null && option.hasPermission(actor)) {
+                        parameters[option.parameter] = true
+                        continue
+                    }
+
+                }
+
+            }
+
+            if (parameterCount < this.function.min) {
                 throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.PARAMETER_COUNT_INSUFFICIENT,label,this.function.command.description)
             }
 

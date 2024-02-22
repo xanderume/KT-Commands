@@ -1,21 +1,21 @@
-package cc.fyre.kt.commands.bukkit
+package cc.fyre.kt.commands.velocity
 
 import cc.fyre.kt.command.Command
 import cc.fyre.kt.command.CommandActor
 import cc.fyre.kt.command.argument.flag.Flag
 import cc.fyre.kt.command.argument.parameter.Parameter
+import com.velocitypowered.api.command.CommandSource
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.command.CommandSender
 
-interface BukkitCommandAdapter {
+interface BungeeCommandAdapter {
 
-    fun createActor(sender: CommandSender):CommandActor<CommandSender,BukkitCommand> {
-        return BukkitCommandActor(sender)
+    fun createActor(sender: CommandSource): CommandActor<CommandSource,BungeeCommand> {
+        return BungeeCommandActor(sender)
     }
 
-    fun createUsage(actor: CommandActor<CommandSender,BukkitCommand>,command: Command):Component {
+    fun createUsage(actor: CommandActor<CommandSource,BungeeCommand>, command: Command): Component {
 
         val function = command.function
         val component = Component.text()
@@ -82,6 +82,7 @@ interface BukkitCommandAdapter {
         return component.build()
     }
 
-    companion object : BukkitCommandAdapter
+    companion object : BungeeCommandAdapter
+
 
 }

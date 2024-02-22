@@ -39,6 +39,7 @@ class BukkitCommandWrapper(val command: BukkitCommand) : Command(command.name,co
         this.plugin.launch(context = CommandScope.coroutineContext) {
             this@BukkitCommandWrapper.command.execute(BukkitCommandPlugin.adapter.createActor(sender),commandLabel,args)
         }
+
         return true
     }
 

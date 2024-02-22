@@ -8,7 +8,6 @@ plugins {
 }
 
 group = "cc.fyre.kt"
-version = "1.0.0"
 
 allprojects {
 
@@ -18,6 +17,7 @@ allprojects {
     apply(plugin = "com.github.johnrengelman.shadow")
 
     repositories {
+        maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
         mavenCentral()
     }

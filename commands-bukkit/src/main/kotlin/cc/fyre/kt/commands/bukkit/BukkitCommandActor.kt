@@ -13,7 +13,7 @@ import org.bukkit.metadata.FixedMetadataValue
 
 open class BukkitCommandActor(val sender: CommandSender) : CommandActor<CommandSender,BukkitCommand>(sender) {
 
-    protected val audience = Audience.sender(this.sender)
+    private val audience = Audience.sender(this.sender)
 
     override fun hasPermission(command: BukkitCommand): Boolean {
 
@@ -59,7 +59,7 @@ open class BukkitCommandActor(val sender: CommandSender) : CommandActor<CommandS
 
         when (exception.error) {
             CommandProcessException.ErrorType.NO_FUNCTION_OR_HELPER -> {
-                this.sender.sendMessage("Command has no sub commands.")
+                this.audience.sendMessage(CommandHasNoSubCommands)
             }
             CommandProcessException.ErrorType.NO_PERMISSION -> {
                 this.audience.sendMessage(NoPermissionMessage)

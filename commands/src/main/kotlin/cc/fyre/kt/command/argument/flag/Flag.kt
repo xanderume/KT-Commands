@@ -10,6 +10,7 @@ class Flag(
 ) : Argument(parameter) {
 
     val flags = this.parameter.findAnnotation<Flag>()!!.flags
+    val flag = this.flags[0]
 
     override val optional: Boolean = true
     override val nullable: Boolean = true
