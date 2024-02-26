@@ -2,6 +2,7 @@ package cc.fyre.kt.commands.bukkit
 
 import cc.fyre.kt.command.CommandScope
 import cc.fyre.kt.command.EmptyMutableList
+import cc.fyre.kt.command.exception.CommandProcessException
 import com.github.shynixn.mccoroutine.bukkit.launch
 import org.bukkit.Location
 import org.bukkit.command.Command
@@ -37,7 +38,16 @@ class BukkitCommandWrapper(val command: BukkitCommand) : Command(command.name,co
         }
 
         this.plugin.launch(context = CommandScope.coroutineContext) {
-            this@BukkitCommandWrapper.command.execute(BukkitCommandPlugin.adapter.createActor(sender),commandLabel,args)
+
+            val actor = BukkitCommandPlugin.adapter.createActor(sender)
+
+            try {
+                this@BukkitCommandWrapper.command.execute(actor,commandLabel,args)
+            } catch (ex: CommandProcessException) {
+                actor.onProcessException(this@BukkitCommandWrapper.command,label,ex)
+                return@launch
+            }
+
         }
 
         return true

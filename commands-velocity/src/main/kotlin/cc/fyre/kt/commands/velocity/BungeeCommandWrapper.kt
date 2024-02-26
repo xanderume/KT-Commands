@@ -1,6 +1,7 @@
 package cc.fyre.kt.commands.velocity
 
 import cc.fyre.kt.command.CommandScope
+import cc.fyre.kt.command.exception.CommandProcessException
 import com.github.shynixn.mccoroutine.velocity.SuspendingSimpleCommand
 import com.velocitypowered.api.command.SimpleCommand
 import com.velocitypowered.api.proxy.ConsoleCommandSource
@@ -24,7 +25,16 @@ class BungeeCommandWrapper(private val command: BungeeCommand) : SuspendingSimpl
         }
 
         withContext(CommandScope.coroutineContext) {
-            this@BungeeCommandWrapper.command.execute(BungeeCommandPlugin.adapter.createActor(sender),label,arguments)
+
+            val actor = BungeeCommandPlugin.adapter.createActor(sender)
+
+            try {
+                this@BungeeCommandWrapper.command.execute(actor,label,arguments)
+            } catch (ex: CommandProcessException) {
+                actor.onProcessException(this@BungeeCommandWrapper.command,label,ex)
+                return@withContext
+            }
+
         }
 
     }

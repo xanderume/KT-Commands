@@ -97,6 +97,7 @@ class DefaultCommandProcessor(
 
                         if (converted != null) {
                             parameters[argument.parameter] = converted
+                            parameterCount++
                         } else {
 
                             if (!(argument.nullable /*|| argument.optional*/)) {
@@ -223,9 +224,10 @@ class DefaultCommandProcessor(
                     throw CommandProcessException(this.function.command, CommandProcessException.ErrorType.ANNOTATION_INVALID, annotation.annotationClass.simpleName!!)
                 }
 
-                if (annotationConverter.nullable != (converted == null)) {
-                    continue
-                }
+//                if (annotationConverter.nullable != (converted == null)) {
+//                    println("Continue")
+//                    continue
+//                }
 
                 converted = annotationConverter.postTransform(actor,source,converted,annotation) ?: throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.ANNOTATION_CONVERSION)
 //                val continuation = annotationConverter.postTransform(actor,source,converted,annotation)

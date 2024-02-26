@@ -56,9 +56,9 @@ open class CommandFunction(val command: Command,val function: KFunction<*>) {
                         throw CommandLoadException(this.command,"Wildcard parameters can only be used as last parameter (${parameter.name})")
                     }
 
-                    if (value.nullable) {
-                        this.defaults[value.parameter] = null
-                    }
+//                    if (value.nullable) {
+//                        this.defaults[value.parameter] = null
+//                    }
 
                     this.parameters.add(value)
                 }
