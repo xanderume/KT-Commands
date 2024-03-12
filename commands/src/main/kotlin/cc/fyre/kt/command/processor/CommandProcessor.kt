@@ -10,6 +10,6 @@ interface CommandProcessor {
     val function: CommandFunction
     val commandMap: CommandMap<*>
 
-    suspend fun process(actor: CommandActor<*,*>, label: String, arguments: Array<out String>):suspend () -> MutableMap<KParameter,Any?>
+    suspend fun process(actor: CommandActor<*,*>,label: String,args: Array<out String>):suspend () -> MutableMap<KParameter,Any?>
 
 }

@@ -3,7 +3,6 @@ package cc.fyre.kt.command.processor.impl
 import cc.fyre.kt.command.CommandActor
 import cc.fyre.kt.command.CommandFunction
 import cc.fyre.kt.command.CommandMap
-import cc.fyre.kt.command.argument.flag.Flag
 import cc.fyre.kt.command.argument.parameter.Parameter
 import cc.fyre.kt.command.argument.parameter.ParameterConverter
 import cc.fyre.kt.command.exception.CommandProcessException
@@ -23,10 +22,16 @@ class DefaultCommandProcessor(
         }}
     }
 
-    override suspend fun process(actor: CommandActor<*,*>,label: String,arguments: Array<out String>): suspend () -> MutableMap<KParameter,Any?> {
+    override suspend fun process(actor: CommandActor<*,*>,label: String,args: Array<out String>): suspend () -> MutableMap<KParameter,Any?> {
+
+        val parameters = this.function.parameters.filter{it.hasPermission(actor)}
+
+        val min = parameters.count{!(it.optional || it.nullable)}
+        val max = parameters.size
+
         return parameters@ {
 
-            val parameters = hashMapOf<KParameter,Any?>()
+            val arguments = hashMapOf<KParameter,Any?>()
 
             var argIndex = 0
             var paramIndex = 0
@@ -34,9 +39,9 @@ class DefaultCommandProcessor(
             var flagsCount = 0
             var parameterCount = 0 // this is so we know all required parameters are provided
 
-            while ((parameterCount < this.function.min || attempts != this.function.max) && argIndex < arguments.size) {
+            while ((parameterCount < min || attempts != max) && argIndex < args.size) {
 
-                var source = arguments[argIndex]
+                var source = args[argIndex]
 
                 // Check if the current argument is an option
                 var option = if (source[0] == cc.fyre.kt.command.annotation.Flag.FLAG_CHAR) {
@@ -48,11 +53,11 @@ class DefaultCommandProcessor(
                 if (option != null && option.hasPermission(actor)) {
                     // Handle options (e.g., flags)
                     flagsCount++
-                    parameters[option.parameter] = true
+                    arguments[option.parameter] = true
                     argIndex++
                 } else {
 
-                    val argument = this.function.parameters[paramIndex]
+                    val argument = parameters[paramIndex]
 
                     val adapter = if (argument.vararg) {
                         this.commandMap[String::class]
@@ -68,9 +73,9 @@ class DefaultCommandProcessor(
 
                         val conjoined = StringBuilder()
 
-                        for (i in argIndex ..< arguments.size) {
+                        for (i in argIndex ..< args.size) {
 
-                            val part = arguments[i]
+                            val part = args[i]
 
                             option = if (source[0] == cc.fyre.kt.command.annotation.Flag.FLAG_CHAR) {
                                 this.function.flagsByKey[part.lowercase()]
@@ -80,7 +85,7 @@ class DefaultCommandProcessor(
 
                             if (option != null && option.hasPermission(actor)) {
                                 flagsCount++
-                                parameters[option.parameter] = true
+                                arguments[option.parameter] = true
                                 continue
                             }
 
@@ -96,7 +101,7 @@ class DefaultCommandProcessor(
                         val converted = this.transform(actor.value,source,argument,adapter)
 
                         if (converted != null) {
-                            parameters[argument.parameter] = converted
+                            arguments[argument.parameter] = converted
                             parameterCount++
                         } else {
 
@@ -126,13 +131,13 @@ class DefaultCommandProcessor(
                         paramIndex++
                         parameterCount++
 
-                        parameters[argument.parameter] = argument.type.safeCast(converted)
+                        arguments[argument.parameter] = argument.type.safeCast(converted)
                     } else {
 
                         val converted = this.transform(actor.value,source,argument,adapter)
 
                         if (converted != null) {
-                            parameters[argument.parameter] = converted
+                            arguments[argument.parameter] = converted
                             paramIndex++
                         } else {
 
@@ -152,11 +157,11 @@ class DefaultCommandProcessor(
                 attempts++
             }
 
-            if (this.function.flags.isNotEmpty() && flagsCount < this.function.flags.size && argIndex < arguments.size) {
+            if (this.function.flags.isNotEmpty() && flagsCount < this.function.flags.size && argIndex < args.size) {
 
-                for (i in (argIndex + 1) until arguments.size) {
+                for (i in (argIndex + 1) until args.size) {
 
-                    val source = arguments[i]
+                    val source = args[i]
                     val option = if (source[0] == cc.fyre.kt.command.annotation.Flag.FLAG_CHAR) {
                         this.function.flagsByKey[source.lowercase()]
                     } else {
@@ -164,7 +169,7 @@ class DefaultCommandProcessor(
                     }
 
                     if (option != null && option.hasPermission(actor)) {
-                        parameters[option.parameter] = true
+                        arguments[option.parameter] = true
                         continue
                     }
 
@@ -172,20 +177,20 @@ class DefaultCommandProcessor(
 
             }
 
-            if (parameterCount < this.function.min) {
+            if (parameterCount < min) {
                 throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.PARAMETER_COUNT_INSUFFICIENT,label,this.function.command.description)
             }
 
             for ((key,value) in this.function.defaults) {
 
-                if (parameters.containsKey(key)) {
+                if (arguments.containsKey(key)) {
                     continue
                 }
 
-                parameters[key] = value
+                arguments[key] = value
             }
 
-            return@parameters parameters
+            return@parameters arguments
         }
     }
 

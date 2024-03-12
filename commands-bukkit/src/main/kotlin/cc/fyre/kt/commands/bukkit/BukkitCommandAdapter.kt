@@ -50,7 +50,7 @@ interface BukkitCommandAdapter {
                         component.append(Component.text(argument.name))
 
                         if (argument.vararg) {
-                            component.append(Component.text(""))
+                            component.append(Component.text("")) // TODO
                         } else if (argument.wildcard) {
                             component.append(Component.text("..."))
                         }

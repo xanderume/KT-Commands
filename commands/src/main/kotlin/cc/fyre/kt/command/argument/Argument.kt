@@ -17,7 +17,11 @@ abstract class Argument(
     val index: Int = this.parameter.index - 2 // Command and Sender first
     val methodIndex = this.parameter.index
 
-    val permission: String? = this.parameter.findAnnotation<Permission>()?.permission
+    private var _permission: String? = this.parameter.findAnnotation<Permission>()?.permission
+
+    val permission: String?
+        get() = this._permission
+
     val description: String? = this.parameter.findAnnotation<Description>()?.description
 
     open val type: KClass<*> = this.parameter.type.classifier as KClass<*>
@@ -32,6 +36,10 @@ abstract class Argument(
         }
 
         return actor.hasPermission(this)
+    }
+
+    fun setPermission(permission: String) {
+        this._permission = permission
     }
 
     override fun equals(other: Any?): Boolean {

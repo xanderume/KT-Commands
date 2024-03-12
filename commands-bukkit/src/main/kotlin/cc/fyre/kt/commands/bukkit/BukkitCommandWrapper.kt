@@ -2,8 +2,12 @@ package cc.fyre.kt.commands.bukkit
 
 import cc.fyre.kt.command.CommandScope
 import cc.fyre.kt.command.EmptyMutableList
+import cc.fyre.kt.command.argument.flag.Flag
+import cc.fyre.kt.command.argument.parameter.Parameter
 import cc.fyre.kt.command.exception.CommandProcessException
 import com.github.shynixn.mccoroutine.bukkit.launch
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
@@ -14,10 +18,14 @@ import org.bukkit.plugin.Plugin
 import kotlin.math.min
 
 /* Simple wrapper class so the compiler doesn't yell at us for having the same JVM signature */
-class BukkitCommandWrapper(val command: BukkitCommand) : Command(command.name,command.description ?: "",command.name /* TODO: parameters */,command.aliases.toList()), PluginIdentifiableCommand {
+class BukkitCommandWrapper(val command: BukkitCommand) : Command(command.name,command.description ?: "","",command.aliases.toList()), PluginIdentifiableCommand {
 
     val hidden: Boolean
         get() = this.command.hidden
+
+    init {
+        this.setUsage(buildUsage())
+    }
 
     override fun getLabel(): String {
         return this.command.label
@@ -139,4 +147,50 @@ class BukkitCommandWrapper(val command: BukkitCommand) : Command(command.name,co
         return completions
     }
 
+    private fun buildUsage() = buildString{
+        append(this@BukkitCommandWrapper.command.name)
+
+        if (this@BukkitCommandWrapper.command.function == null) {
+            return@buildString
+        }
+
+        for (argument in this@BukkitCommandWrapper.command.function!!.arguments) {
+
+            if (argument.permission != null) {
+                continue
+            }
+
+            when (argument) {
+                is Flag -> {
+                    append("(")
+                    append("-${argument.flag}") // TODO AQUA?
+                    append(")")
+                }
+                is Parameter -> {
+                    if (argument.optional || argument.nullable) {
+                        append("[")
+                    } else {
+                        append("<")
+                    }
+
+                    append(argument.name)
+
+                    if (argument.vararg) {
+                        append("") // TODO
+                    } else if (argument.wildcard) {
+                        append("...")
+                    }
+
+                    if (argument.optional || argument.nullable) {
+                        append("]")
+                    } else {
+                        append(">")
+                    }
+
+
+                }
+            }
+        }
+
+    }
 }
