@@ -2,7 +2,7 @@ package cc.fyre.kt.command.exception
 
 import cc.fyre.kt.command.Command
 
-class CommandProcessException(val command: Command,val error: ErrorType,vararg val parameters: Any?) : RuntimeException() {
+open class CommandProcessException(val command: Command,val error: ErrorType,vararg val parameters: Any?) : RuntimeException() {
 
     enum class ErrorType {
 

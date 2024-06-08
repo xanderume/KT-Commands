@@ -3,14 +3,15 @@ package cc.fyre.kt.commands.velocity
 import cc.fyre.kt.command.CommandActor
 import cc.fyre.kt.command.argument.Argument
 import cc.fyre.kt.command.exception.CommandProcessException
+import com.google.common.cache.Cache
+import com.google.common.cache.CacheBuilder
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.proxy.Player
-import io.github.reactivecircus.cache4k.Cache
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import java.util.UUID
-import kotlin.time.Duration
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.minutes
 
 open class BungeeCommandActor(val sender: CommandSource) : CommandActor<CommandSource,BungeeCommand>(sender) {
@@ -38,7 +39,7 @@ open class BungeeCommandActor(val sender: CommandSource) : CommandActor<CommandS
             return lastConsoleUsages[command.id] ?: 0L
         }
 
-        val map = lastPlayerUsages.get(this.sender.uniqueId)
+        val map = lastPlayerUsages.getIfPresent(this.sender.uniqueId)
 
         if (map == null) {
             return 0L
@@ -54,7 +55,7 @@ open class BungeeCommandActor(val sender: CommandSource) : CommandActor<CommandS
             return
         }
 
-        var map = lastPlayerUsages.get(this.sender.uniqueId)
+        var map = lastPlayerUsages.getIfPresent(this.sender.uniqueId)
 
         if (map == null) {
             map = hashMapOf()
@@ -113,9 +114,10 @@ open class BungeeCommandActor(val sender: CommandSource) : CommandActor<CommandS
 
     companion object {
 
-        private val lastPlayerUsages = Cache.Builder<UUID,HashMap<Int,Long>>()
-            .expireAfterAccess(5L.minutes)
-            .build()
+
+        private val lastPlayerUsages = CacheBuilder.newBuilder()
+            .expireAfterAccess(5L,TimeUnit.MINUTES)
+            .build<UUID,HashMap<Int,Long>>()
 
         private val lastConsoleUsages = hashMapOf<Int,Long>()
 

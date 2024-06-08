@@ -1,6 +1,7 @@
 package cc.fyre.kt.command
 
 import cc.fyre.kt.command.exception.CommandProcessException
+import cc.fyre.kt.command.exception.CommandSendUsageException
 import cc.fyre.kt.command.processor.CommandProcessor
 import kotlin.math.min
 import kotlin.reflect.full.callSuspendBy
@@ -81,10 +82,14 @@ interface Command {
         parameters[this.function!!.instanceParameter] = this.instance
         parameters[this.function!!.senderParameter] = actor.value
 
-        if (this.function!!.suspending) {
-            function.callSuspendBy(parameters)
-        } else {
-            function.callBy(parameters)
+        try {
+            if (this.function!!.suspending) {
+                function.callSuspendBy(parameters)
+            } else {
+                function.callBy(parameters)
+            }
+        } catch (ex: CommandSendUsageException) {
+            actor.onProcessException(this,label,CommandProcessException(this,CommandProcessException.ErrorType.PARAMETER_COUNT_INSUFFICIENT,label,this.description))
         }
     }
 

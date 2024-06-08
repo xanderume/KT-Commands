@@ -218,7 +218,7 @@ class DefaultCommandProcessor(
             parameterConverter.convert(actor,source,parameter.annotations)
         } catch (ex: Exception) {
             parameterConverter.handleException(actor,source,ex)
-            throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.PARAMETER_CONVERSION)
+            throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.PARAMETER_CONVERSION,source)
         }
 
         if (annotations.isNotEmpty()) {
@@ -234,7 +234,7 @@ class DefaultCommandProcessor(
 //                    continue
 //                }
 
-                converted = annotationConverter.postTransform(actor,source,converted,annotation) ?: throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.ANNOTATION_CONVERSION)
+                converted = annotationConverter.postTransform(actor,source,converted,annotation) ?: throw CommandProcessException(this.function.command,CommandProcessException.ErrorType.ANNOTATION_CONVERSION,source)
 //                val continuation = annotationConverter.postTransform(actor,source,converted,annotation)
 //
 //                if (!continuation.resume) {

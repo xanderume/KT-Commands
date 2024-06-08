@@ -17,3 +17,5 @@ dependencyResolutionManagement {
     }
 }
 include("commands-velocity")
+include("commands-terminal")
+include("commands-bungee")

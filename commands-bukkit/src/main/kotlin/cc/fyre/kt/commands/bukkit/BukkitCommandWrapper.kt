@@ -52,7 +52,7 @@ class BukkitCommandWrapper(val command: BukkitCommand) : Command(command.name,co
             try {
                 this@BukkitCommandWrapper.command.execute(actor,commandLabel,args)
             } catch (ex: CommandProcessException) {
-                actor.onProcessException(this@BukkitCommandWrapper.command,label,ex)
+                actor.onProcessException(this@BukkitCommandWrapper.command,commandLabel,ex)
                 return@launch
             }
 

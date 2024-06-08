@@ -1,6 +1,7 @@
 package cc.fyre.kt.command.argument
 
 import cc.fyre.kt.command.CommandActor
+import cc.fyre.kt.command.annotation.Alias
 import cc.fyre.kt.command.annotation.Description
 import cc.fyre.kt.command.annotation.Permission
 import java.util.Objects
@@ -12,7 +13,7 @@ abstract class Argument(
     val parameter: KParameter
 ) {
 
-    val name: String = this.parameter.name ?: "null"
+    val name: String = this.parameter.findAnnotation<Alias>()?.aliases?.firstOrNull() ?: this.parameter.name ?: "null"
 
     val index: Int = this.parameter.index - 2 // Command and Sender first
     val methodIndex = this.parameter.index
