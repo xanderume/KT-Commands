@@ -11,7 +11,7 @@ junit-jupiter-api = {module = "org.junit.jupiter:junit-jupiter-api",version.ref 
 junit-jupiter-engine = {module = "org.junit.jupiter:junit-jupiter-engine",version.ref = "junit-version"}
 
 kotlin-atomic = {module = "org.jetbrains.kotlinx:atomicfu",version = "0.21.0"}
-kotlin-coroutines = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-core",version = "1.7.3"}
+kotlin-coroutines = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-core",version = "1.9.0-RC"}
 
 spigot-api = {module = "org.spigotmc:spigot-api",version = "1.20.2-R0.1-SNAPSHOT"}
 velocity-api = {module = "com.velocitypowered:velocity-api",version = "3.2.0-SNAPSHOT"}

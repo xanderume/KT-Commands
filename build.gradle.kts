@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `maven-publish`
-    kotlin("jvm") version "1.9.20"
+    kotlin("jvm") version "2.0.0"
     id("net.linguica.maven-settings") version "0.5"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
@@ -68,7 +68,7 @@ allprojects {
     publishing {
 
         repositories {
-            fyre()
+            fyreReleases()
         }
 
         publications {
@@ -86,23 +86,9 @@ allprojects {
     }
 }
 
-fun RepositoryHandler.fyre() {
+fun RepositoryHandler.fyreReleases() {
     maven {
-        name = "fyre"
-        url = uri("https://maven.pkg.jetbrains.space/fyre/p/fyre-games/maven")
-        applySpaceCredentials()
+        name = "fyreReleases"
+        url = uri("https://maven.fyre.cc/releases")
     }
-}
-
-fun MavenArtifactRepository.applySpaceCredentials() {
-
-    if (System.getenv().containsKey("JB_SPACE_CLIENT_ID") && System.getenv().containsKey("JB_SPACE_CLIENT_SECRET")) {
-        credentials {
-            // Automation has a special account for authentication in Space
-            // account credentials are accessible via env vars
-            username = System.getenv()["JB_SPACE_CLIENT_ID"]
-            password = System.getenv()["JB_SPACE_CLIENT_SECRET"]
-        }
-    }
-
 }
